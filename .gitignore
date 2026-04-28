@@ -1,0 +1,20 @@
+# Temporary files
+*.tmp
+*.bak
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Downloaded Media (if saved in workspace)
+*.mp4
+*.mkv
+*.webm
+*.mp3
+*.m4a
+*.vtt
+*.srt
+
+# OS generated
+Thumbs.db
+.DS_Store
