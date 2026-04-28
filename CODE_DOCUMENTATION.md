@@ -12,6 +12,7 @@ yt-downloader/
 ├── DESIGN_PHILOSOPHY.md           # Design principles and rationale
 ├── CONTRIBUTING.md                # Guidelines for contributors
 │
+├── run_downloader.bat             # Master orchestrator script
 ├── youtube_download.bat           # Script for single video downloads
 ├── youtube_shorts_download.bat    # Script for YouTube Shorts
 └── youtube_bulk_download.bat      # Script for playlists/channels
@@ -19,12 +20,13 @@ yt-downloader/
 
 ## 2. High-Level Architecture
 
-The project consists of independent Windows Batch scripts that act as interactive wrappers around the `yt-dlp` CLI tool. They provide a user-friendly menu system to capture user preferences and translate them into optimized `yt-dlp` commands.
+The project utilizes a hub-and-spoke architecture. `run_downloader.bat` serves as the central hub, executing the specialized scripts based on user requirements.
 
 ## 3. Core Modules & Functionality
 
 | Script | Primary Role | Key Parameters Handled |
 | :--- | :--- | :--- |
+| `run_downloader.bat` | Master Menu | Option Selection (0-3) |
 | `youtube_download.bat` | Single Video | URL, Quality (1080p-360p/Best/Audio), Subtitles |
 | `youtube_shorts_download.bat` | Shorts (Single/Bulk) | URL, Quality, Range Selection |
 | `youtube_bulk_download.bat` | Playlists/Channels | URL, Quality, Subtitles, Range Selection |
@@ -53,9 +55,10 @@ graph TD
 
 ## 6. Execution Flow
 
-1. **Initialization**: Script sets title, color, and active directory.
-2. **Configuration**: Loads hardcoded `SAVE_DIR` (if set) or prompts user.
-3. **Input Gathering**: Asks for URL, Quality preference, and additional options (Subtitles/Range).
-4. **Command Assembly**: Dynamically builds the `yt-dlp` argument string based on user inputs.
-5. **Execution**: Calls `yt-dlp` with assembled flags.
-6. **Completion**: Reports success/failure and retains console window via `pause`.
+1. **Entry Point**: User launches `run_downloader.bat`.
+2. **Routing**: User selects a script, which is launched via `call`.
+3. **Initialization**: The targeted script sets its specific environment.
+4. **Input Gathering**: Captures URL, quality choices, and filter parameters.
+5. **Command Assembly**: Dynamically builds the `yt-dlp` argument payload.
+6. **Execution**: Calls `yt-dlp` with assembled flags.
+7. **Loopback**: Returns control to the master menu upon completion.

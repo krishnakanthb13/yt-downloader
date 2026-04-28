@@ -45,30 +45,36 @@ To use these scripts, you must have the following tools installed and added to y
    - Open any `.bat` file in a text editor.
    - Locate the line: `set "SAVE_DIR=D:\5 System 6\Vidoes"`
    - Change it to your desired download directory (e.g., `set "SAVE_DIR=C:\Users\YourName\Downloads"`).
-3. **Execute**: Double-click the script corresponding to your needs:
-   - `youtube_download.bat` for single videos.
-   - `youtube_shorts_download.bat` for short-form vertical content.
-   - `youtube_bulk_download.bat` for playlists or channel archives.
+3. **Execute**: 
+   - **Recommended**: Double-click `run_downloader.bat` to open the Master Menu and choose an option.
+   - Alternatively, double-click the specific script directly:
+     - `youtube_download.bat` for single videos.
+     - `youtube_shorts_download.bat` for shorts.
+     - `youtube_bulk_download.bat` for playlists/channels.
 4. **Follow Prompts**: Paste the URL and make your selections via the keyboard.
 
 ---
 
 ## Code Functionality Documentation
 
-### 1. `youtube_download.bat`
+### 1. `run_downloader.bat`
+- **Purpose**: Master orchestrator providing a central menu.
+- **Features**: Quick routing to specific scripts without opening multiple windows.
+
+### 2. `youtube_download.bat`
 - **Purpose**: Downloads standalone YouTube videos.
 - **Features**:
   - Quality presets: Best, 1080p, 720p, 480p, 360p, or Audio Only (MP3).
   - Subtitle downloading (supports English, Tamil, or all available).
 
-### 2. `youtube_shorts_download.bat`
+### 3. `youtube_shorts_download.bat`
 - **Purpose**: Specifically handles YouTube Shorts.
 - **Features**:
   - Supports individual short URLs OR channel shorts tabs.
   - Quality mapping adapted for standard mobile resolutions.
   - Range selection for bulk downloading channel shorts.
 
-### 3. `youtube_bulk_download.bat`
+### 4. `youtube_bulk_download.bat`
 - **Purpose**: Automates mass downloads of playlists or entire channel uploads.
 - **Features**:
   - Safely handles multi-video downloads sequentially.
@@ -79,13 +85,14 @@ To use these scripts, you must have the following tools installed and added to y
 
 ## How the Files are Connected
 
-The files are architecturally **decoupled standalone tools** designed to act as modular interfaces for the same backend toolchain (`yt-dlp`). 
+The master orchestrator script centralizes operations, routing execution based on user choices.
 
 ```mermaid
 graph TD
-    A[User] -->|Runs| B[youtube_download.bat]
-    A -->|Runs| C[youtube_shorts_download.bat]
-    A -->|Runs| D[youtube_bulk_download.bat]
+    A[User] -->|Runs| M[run_downloader.bat]
+    M -->|Calls| B[youtube_download.bat]
+    M -->|Calls| C[youtube_shorts_download.bat]
+    M -->|Calls| D[youtube_bulk_download.bat]
     
     B -->|Passes flags| E((yt-dlp + FFmpeg))
     C -->|Passes flags| E
