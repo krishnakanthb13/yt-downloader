@@ -35,6 +35,9 @@ This project was created to remove the friction of using command-line tools for 
 To use these scripts, you must have the following tools installed and added to your Windows **System PATH**:
 1. **yt-dlp**: The core downloading engine. [Download yt-dlp](https://github.com/yt-dlp/yt-dlp)
 2. **ffmpeg**: Required for merging high-quality video and audio streams. [Download FFmpeg](https://ffmpeg.org/)
+3. **JavaScript Runtime**: Required by `yt-dlp` for modern YouTube extraction.
+   - **Recommended**: [Deno](https://deno.com/) (or run `winget install --id=DenoLand.Deno` in terminal).
+   - Alternative: [Node.js](https://nodejs.org/).
 
 ---
 

@@ -112,6 +112,7 @@ if "%FHEIGHT%"=="best" (
 :: Single short
 if "%BULK%"=="no" (
     yt-dlp ^
+        --remote-components ejs:github ^
         -f "%FMTSTR%" ^
         --merge-output-format mp4 ^
         --retries 5 ^
@@ -125,6 +126,7 @@ if "%BULK%"=="no" (
 
 :: Bulk shorts from channel
 yt-dlp ^
+    --remote-components ejs:github ^
     --yes-playlist ^
     -f "%FMTSTR%" ^
     %RANGEFLAGS% ^
@@ -147,6 +149,7 @@ if errorlevel 1 (
     echo  Download COMPLETE!
     echo  Files saved in: %SAVE_DIR%
     echo ============================================
+    explorer "%SAVE_DIR%"
 )
 
 echo.

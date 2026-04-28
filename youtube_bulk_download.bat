@@ -78,7 +78,7 @@ if "%QCHOICE%"=="2" (
 if "%AUDIOONLY%"=="no" (
     echo.
     echo Subtitle options:
-    echo   1. No subtitles (default)
+    echo   1. No subtitles (default^)
     echo   2. English
     echo   3. Tamil
     echo   4. All available
@@ -124,6 +124,7 @@ echo.
 :: Audio only
 if "%AUDIOONLY%"=="yes" (
     yt-dlp ^
+        --remote-components ejs:github ^
         --yes-playlist ^
         -x --audio-format mp3 --audio-quality 0 ^
         %RANGEFLAGS% ^
@@ -153,6 +154,7 @@ if "%SUBLANG%"=="none" (
 )
 
 yt-dlp ^
+    --remote-components ejs:github ^
     --yes-playlist ^
     -f "%FMTSTR%" ^
     %SUBFLAGS% ^
@@ -177,6 +179,7 @@ if errorlevel 1 (
     echo  All downloads COMPLETE!
     echo  Files saved in: %SAVE_DIR%
     echo ============================================
+    explorer "%SAVE_DIR%"
 )
 
 echo.
