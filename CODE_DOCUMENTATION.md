@@ -26,7 +26,7 @@ The project utilizes a hub-and-spoke architecture. `run_downloader.bat` serves a
 
 | Script | Primary Role | Key Parameters Handled |
 | :--- | :--- | :--- |
-| `run_downloader.bat` | Master Menu | Option Selection (0-3) |
+| `run_downloader.bat` | Master Menu | Option Selection (0-4) |
 | `youtube_download.bat` | Single Video | URL, Quality (1080p-360p/Best/Audio), Subtitles |
 | `youtube_shorts_download.bat` | Shorts (Single/Bulk) | URL, Quality, Range Selection |
 | `youtube_bulk_download.bat` | Playlists/Channels | URL, Quality, Subtitles, Range Selection |
