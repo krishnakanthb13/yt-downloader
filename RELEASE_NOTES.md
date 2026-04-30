@@ -1,5 +1,21 @@
 # Release Notes
 
+## [v0.0.8] - 2026-04-30
+### 🚀 New Features
+- **Cross-Platform Unix Support**: Mac and Linux users can now run the suite natively using the new `.sh` Bash scripts, mirroring the complete functionality of the Windows `.bat` versions.
+- **Smart Update Fallback**: The yt-dlp updater now automatically falls back to `--user` mode on Mac/Linux if a system-wide permission error occurs.
+
+### ⚡ Improvements
+- **Hardened Bash Security**: Complete overhaul of the Unix `.sh` scripts. Replaced space-separated string flags with Bash Arrays (`"${ARRAY[@]}"`) to fully prevent shell metacharacter injection and word splitting.
+- **Robust Input Parsing**: Switched to `read -rp` across all interactive prompts to safely handle backslashes and special characters in URLs and path inputs.
+- **Graceful Error Handling**: Added strict verification for download directory creation (`mkdir -p`), ensuring the script fails safely if write permissions are denied.
+
+### 📚 Documentation
+- **Mac/Linux Onboarding**: Updated the README and Code Documentation to include `.sh` execution instructions (`chmod +x`).
+- **Security Audit Docs**: Added a dedicated section detailing Unix script security hardening in `CODE_DOCUMENTATION.md`.
+
+---
+
 ## [v0.0.6] - 2026-04-30
 ### 🚀 New Features (Initial Release)
 - **Master Menu Orchestrator**: A central hub (`run_downloader.bat`) to access all downloader scripts instantly.

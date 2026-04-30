@@ -3,13 +3,14 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 <p align="center">
-  <img src="assets/release_v0.0.6.png" alt="YouTube Downloader Suite v0.0.6 Release Promo" width="800">
+  <img src="assets/release_v0.0.6.png" alt="YouTube Downloader Suite v0.0.6 Release Promo" width="48%">
+  <img src="assets/release_v0.0.8.png" alt="YouTube Downloader Suite v0.0.8 Release Promo" width="48%">
 </p>
 
-A user-friendly collection of Windows batch scripts for downloading YouTube videos, shorts, and playlists/channels with customizable quality and subtitle options.
+A user-friendly collection of cross-platform scripts (.bat for Windows, .sh for Mac/Linux) for downloading YouTube videos, shorts, and playlists/channels with customizable quality and subtitle options.
 
 ## One-Liner
-A collection of interactive Windows batch scripts to effortlessly download YouTube videos, shorts, and playlists using `yt-dlp`.
+A collection of interactive command-line scripts to effortlessly download YouTube videos, shorts, and playlists using `yt-dlp` across all operating systems.
 
 ---
 
@@ -54,30 +55,34 @@ To use these scripts, you must have the following tools installed and added to y
      - `youtube_download.bat` for single videos.
      - `youtube_shorts_download.bat` for shorts.
      - `youtube_bulk_download.bat` for playlists/channels.
-4. **Follow Prompts**: Paste the URL and make your selections via the keyboard.
+4. **Unix Execution (Mac/Linux)**: 
+   - Open your terminal and give execution permissions: `chmod +x *.sh`
+   - Run the master orchestrator: `./run_downloader.sh`
+   - Or run specific scripts: `./youtube_download.sh`, etc.
+5. **Follow Prompts**: Paste the URL and make your selections via the keyboard.
 
 ---
 
 ## Code Functionality Documentation
 
-### 1. `run_downloader.bat`
+### 1. `run_downloader.bat` / `run_downloader.sh`
 - **Purpose**: Master orchestrator providing a central menu.
-- **Features**: Quick routing to specific scripts without opening multiple windows.
+- **Features**: Quick routing to specific scripts without opening multiple windows. Handles `yt-dlp` updates with robust permission fallback on Unix.
 
-### 2. `youtube_download.bat`
+### 2. `youtube_download.bat` / `youtube_download.sh`
 - **Purpose**: Downloads standalone YouTube videos.
 - **Features**:
   - Quality presets: Best, 1080p, 720p, 480p, 360p, or Audio Only (MP3).
   - Subtitle downloading (supports English, Tamil, or all available).
 
-### 3. `youtube_shorts_download.bat`
+### 3. `youtube_shorts_download.bat` / `youtube_shorts_download.sh`
 - **Purpose**: Specifically handles YouTube Shorts.
 - **Features**:
   - Supports individual short URLs OR channel shorts tabs.
   - Quality mapping adapted for standard mobile resolutions.
-  - Range selection for bulk downloading channel shorts.
+  - Range selection for bulk downloading channel shorts safely using bash arrays.
 
-### 4. `youtube_bulk_download.bat`
+### 4. `youtube_bulk_download.bat` / `youtube_bulk_download.sh`
 - **Purpose**: Automates mass downloads of playlists or entire channel uploads.
 - **Features**:
   - Safely handles multi-video downloads sequentially.
@@ -92,10 +97,10 @@ The master orchestrator script centralizes operations, routing execution based o
 
 ```mermaid
 graph TD
-    A[User] -->|Runs| M[run_downloader.bat]
-    M -->|Calls| B[youtube_download.bat]
-    M -->|Calls| C[youtube_shorts_download.bat]
-    M -->|Calls| D[youtube_bulk_download.bat]
+    A[User] -->|Runs| M["run_downloader (.bat/.sh)"]
+    M -->|Calls| B["youtube_download (.bat/.sh)"]
+    M -->|Calls| C["youtube_shorts_download (.bat/.sh)"]
+    M -->|Calls| D["youtube_bulk_download (.bat/.sh)"]
     
     B -->|Passes flags| E((yt-dlp + FFmpeg))
     C -->|Passes flags| E
