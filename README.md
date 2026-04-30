@@ -3,7 +3,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 <p align="center">
-  <img src="assets/release_promo.png" alt="YouTube Downloader Suite Release Promo" width="800">
+  <img src="assets/release_v0.0.6.png" alt="YouTube Downloader Suite v0.0.6 Release Promo" width="800">
 </p>
 
 A user-friendly collection of Windows batch scripts for downloading YouTube videos, shorts, and playlists/channels with customizable quality and subtitle options.
