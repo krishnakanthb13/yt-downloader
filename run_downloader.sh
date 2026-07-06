@@ -24,25 +24,30 @@ while true; do
 
     if [ "$MCHOICE" = "1" ]; then
         clear
-        ./youtube_download.sh
+        bash youtube_download.sh
     elif [ "$MCHOICE" = "2" ]; then
         clear
-        ./youtube_shorts_download.sh
+        bash youtube_shorts_download.sh
     elif [ "$MCHOICE" = "3" ]; then
         clear
-        ./youtube_bulk_download.sh
+        bash youtube_bulk_download.sh
     elif [ "$MCHOICE" = "4" ]; then
         clear
         echo -e "${GREEN}============================================${NC}"
         echo -e "${GREEN} Updating yt-dlp...${NC}"
         echo -e "${GREEN}============================================${NC}"
-        if ! python3 -m pip install -U "yt-dlp[default]"; then
-            echo -e "\n${GREEN}Standard install failed. Retrying with --user flag...${NC}"
-            if ! python3 -m pip install -U --user "yt-dlp[default]"; then
-                ERR_CODE=$?
-                echo -e "\nERROR: yt-dlp update failed with exit code ${ERR_CODE}." >&2
-                echo "Please check your permissions, or try using a virtualenv or running with sudo (if appropriate)." >&2
-            fi
+        if command -v pipx >/dev/null 2>&1; then
+            pipx upgrade yt-dlp
+        elif command -v pip3 >/dev/null 2>&1; then
+            pip3 install -U "yt-dlp[default]"
+        elif command -v pip >/dev/null 2>&1; then
+            pip install -U "yt-dlp[default]"
+        elif command -v python3 >/dev/null 2>&1; then
+            python3 -m pip install -U "yt-dlp[default]"
+        elif command -v python >/dev/null 2>&1; then
+            python -m pip install -U "yt-dlp[default]"
+        else
+            yt-dlp -U
         fi
         echo
         read -n 1 -s -r -p "Press any key to continue..."

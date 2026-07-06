@@ -35,7 +35,18 @@ if "%MCHOICE%"=="1" (
     echo ============================================
     echo  Updating yt-dlp...
     echo ============================================
-    python -m pip install -U "yt-dlp[default]"
+    where python >nul 2>&1
+    if %errorlevel% equ 0 (
+        python -m pip install -U "yt-dlp[default]"
+    ) else (
+        where pip >nul 2>&1
+        if %errorlevel% equ 0 (
+            pip install -U "yt-dlp[default]"
+        ) else (
+            echo python or pip not found. Trying yt-dlp self-update...
+            yt-dlp -U
+        )
+    )
     echo.
     pause
     goto menu
@@ -46,3 +57,4 @@ if "%MCHOICE%"=="1" (
     pause >nul
     goto menu
 )
+

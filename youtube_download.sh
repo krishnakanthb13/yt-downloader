@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+trap 'echo; echo "Cancelled."; exit 130' INT
 
 # Change to script directory
 cd "$(dirname "$0")" || exit
@@ -6,6 +8,19 @@ cd "$(dirname "$0")" || exit
 # ANSI Colors
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
+
+# Check that yt-dlp exists
+if ! command -v yt-dlp >/dev/null 2>&1; then
+    echo -e "${CYAN}ERROR: yt-dlp is not installed.${NC}"
+    echo "Run option 4 from the main menu first."
+    exit 1
+fi
+
+
+# Detect internet connection
+if ! command -v curl >/dev/null 2>&1 || ! curl --connect-timeout 5 -A "Mozilla/5.0" -Is https://www.youtube.com >/dev/null 2>&1; then
+    echo -e "${CYAN}WARNING: Could not connect to youtube.com. You may be offline.${NC}"
+fi
 
 # ============================================
 # HARDCODE YOUR SAVE LOCATION HERE
@@ -33,6 +48,12 @@ if [ -z "$URL" ]; then
     exit 1
 fi
 
+if [[ ! "$URL" =~ ^https?:// ]]; then
+    echo "ERROR: Invalid URL format."
+    read -n 1 -s -r -p "Press any key to continue..."
+    exit 1
+fi
+
 # Save location
 if [ -z "$SAVE_DIR" ]; then
     echo
@@ -42,40 +63,52 @@ if [ -z "$SAVE_DIR" ]; then
     fi
 fi
 
-if [ ! -d "$SAVE_DIR" ]; then
-    if ! mkdir -p "$SAVE_DIR"; then
-        echo "ERROR: Failed to create save directory '$SAVE_DIR'." >&2
-        exit 1
-    fi
-fi
+mkdir -p "$SAVE_DIR" || { echo "ERROR: Failed to create save directory '$SAVE_DIR'." >&2; exit 1; }
 echo "Save location: $SAVE_DIR"
 
 # Quality
 echo
 echo "Quality options:"
 echo "  1. Best (default)"
-echo "  2. 1080p"
-echo "  3. 720p"
-echo "  4. 480p"
-echo "  5. 360p"
-echo "  6. Audio only (mp3)"
+echo "  2. 2160p (4K)"
+echo "  3. 1440p (2K)"
+echo "  4. 1080p"
+echo "  5. 720p"
+echo "  6. 480p"
+echo "  7. 360p"
+echo "  8. Audio only (mp3)"
 echo
-read -rp "Choose quality (1-6, default=1): " QCHOICE
+read -rp "Choose quality (1-8, default=1): " QCHOICE
 
 AUDIOONLY="no"
 if [ "$QCHOICE" = "2" ]; then
-    FHEIGHT="1080"
+    FHEIGHT="2160"
 elif [ "$QCHOICE" = "3" ]; then
-    FHEIGHT="720"
+    FHEIGHT="1440"
 elif [ "$QCHOICE" = "4" ]; then
-    FHEIGHT="480"
+    FHEIGHT="1080"
 elif [ "$QCHOICE" = "5" ]; then
-    FHEIGHT="360"
+    FHEIGHT="720"
 elif [ "$QCHOICE" = "6" ]; then
+    FHEIGHT="480"
+elif [ "$QCHOICE" = "7" ]; then
+    FHEIGHT="360"
+elif [ "$QCHOICE" = "8" ]; then
     FHEIGHT="best"
     AUDIOONLY="yes"
 else
     FHEIGHT="best"
+fi
+
+# Check FFmpeg requirements
+if ! command -v ffmpeg >/dev/null 2>&1; then
+    if [ "$AUDIOONLY" = "yes" ]; then
+        echo -e "${CYAN}ERROR: ffmpeg is required for audio extraction (mp3) but was not found.${NC}"
+        read -n 1 -s -r -p "Press any key to continue..."
+        exit 1
+    else
+        echo -e "${CYAN}WARNING: ffmpeg not found. Some video formats may not merge correctly.${NC}"
+    fi
 fi
 
 # Subtitles (skip if audio only)
@@ -111,18 +144,30 @@ echo -e "${CYAN} Quality : $FHEIGHT${NC}"
 echo -e "${CYAN}============================================${NC}"
 echo
 
+# Cookies support
+COOKIEFLAGS=()
+if [ -f "$HOME/youtube_cookies.txt" ]; then
+    COOKIEFLAGS=("--cookies" "$HOME/youtube_cookies.txt")
+elif [ -f "cookies.txt" ]; then
+    COOKIEFLAGS=("--cookies" "cookies.txt")
+fi
+
 # Download execution
 if [ "$AUDIOONLY" = "yes" ]; then
+    set +e
     yt-dlp \
         --remote-components ejs:github \
+        "${COOKIEFLAGS[@]}" \
         -x --audio-format mp3 --audio-quality 0 \
         --retries 5 \
         --fragment-retries 5 \
-        --continue \
+        -c --part \
         --no-overwrites \
-        -o "$SAVE_DIR/%(title)s.%(ext)s" \
+        --match-filter "!is_live" \
+        -o "$SAVE_DIR/%(title).150s.%(ext)s" \
         "$URL"
     ERROR_CODE=$?
+    set -e
 else
     # Build format string
     if [ "$FHEIGHT" = "best" ]; then
@@ -140,22 +185,28 @@ else
         SUBFLAGS=("--write-subs" "--write-auto-subs" "--sub-langs" "$SUBLANG")
     fi
 
+    set +e
     yt-dlp \
         --remote-components ejs:github \
+        "${COOKIEFLAGS[@]}" \
         -f "$FMTSTR" \
         "${SUBFLAGS[@]}" \
         --merge-output-format mp4 \
+        --embed-metadata \
+        --embed-thumbnail \
         --retries 5 \
         --fragment-retries 5 \
-        --continue \
+        -c --part \
         --no-overwrites \
-        -o "$SAVE_DIR/%(title)s.%(ext)s" \
+        --match-filter "!is_live" \
+        -o "$SAVE_DIR/%(title).150s.%(ext)s" \
         "$URL"
     ERROR_CODE=$?
+    set -e
 fi
 
 echo
-if [ $ERROR_CODE -ne 0 ]; then
+if [ "$ERROR_CODE" -ne 0 ]; then
     echo -e "${CYAN}============================================${NC}"
     echo -e "${CYAN} Download FAILED. Check errors above.${NC}"
     echo -e "${CYAN}============================================${NC}"
