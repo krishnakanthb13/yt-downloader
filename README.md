@@ -17,7 +17,7 @@ A collection of interactive command-line scripts to effortlessly download YouTub
 ## Table of Contents
 1. [Why and What is it Created For?](#why-and-what-is-it-created-for)
 2. [Prerequisites](#prerequisites)
-3. [How to Use It](#how-to-use-it)
+3. [How to Use It](#how-to-use-it) (including [Running Tests](#running-tests))
 4. [Code Functionality Documentation](#code-functionality-documentation)
 5. [How the Files are Connected](#how-the-files-are-connected)
 
@@ -47,7 +47,7 @@ To use these scripts, you must have the following tools installed and added to y
 1. **Clone/Download** this repository to your local machine.
 2. **(Optional) Set Default Save Path**:
    - Open any `.bat` file in a text editor.
-   - Locate the line: `set "SAVE_DIR=D:\5 System 6\Vidoes"`
+   - Locate the line: `set "SAVE_DIR=D:\5 System 6\Videos"`
    - Change it to your desired download directory (e.g., `set "SAVE_DIR=C:\Users\YourName\Downloads"`).
 3. **Execute**: 
    - **Recommended**: Double-click `run_downloader.bat` to open the Master Menu and choose an option.
@@ -57,9 +57,18 @@ To use these scripts, you must have the following tools installed and added to y
      - `youtube_bulk_download.bat` for playlists/channels.
 4. **Unix Execution (Mac/Linux)**: 
    - Open your terminal and give execution permissions: `chmod +x *.sh`
-   - Run the master orchestrator: `./run_downloader.sh`
-   - Or run specific scripts: `./youtube_download.sh`, etc.
+   - Run the master orchestrator: `bash run_downloader.sh`
+   - Or run specific scripts: `bash youtube_download.sh`, etc.
 5. **Follow Prompts**: Paste the URL and make your selections via the keyboard.
+6. **Running Tests**:
+   - **Windows**: Open PowerShell, navigate to the project directory, and run the test suite:
+     ```powershell
+     powershell -ExecutionPolicy Bypass -File tests/run_all_tests.ps1
+     ```
+   - **Linux/Mac**: Run the shell test runner script:
+     ```bash
+     bash tests/run_all_tests.sh
+     ```
 
 ---
 
@@ -67,20 +76,24 @@ To use these scripts, you must have the following tools installed and added to y
 
 ### 1. `run_downloader.bat` / `run_downloader.sh`
 - **Purpose**: Master orchestrator providing a central menu.
-- **Features**: Quick routing to specific scripts without opening multiple windows. Handles `yt-dlp` updates with robust permission fallback on Unix.
+- **Features**: Quick routing to specific scripts without opening multiple windows. Handles `yt-dlp` updates with robust fallback commands (including `pipx`, `pip3`, `pip`, and `python -m pip`).
 
 ### 2. `youtube_download.bat` / `youtube_download.sh`
 - **Purpose**: Downloads standalone YouTube videos.
 - **Features**:
-  - Quality presets: Best, 1080p, 720p, 480p, 360p, or Audio Only (MP3).
+  - Quality presets: Best, 2160p (4K), 1440p (2K), 1080p, 720p, 480p, 360p, or Audio Only (MP3).
   - Subtitle downloading (supports English, Tamil, or all available).
+  - Embedded metadata and thumbnails.
+  - Active network checking before download starts.
+  - Verification of `yt-dlp` and `ffmpeg` presence with user notifications.
 
 ### 3. `youtube_shorts_download.bat` / `youtube_shorts_download.sh`
 - **Purpose**: Specifically handles YouTube Shorts.
 - **Features**:
   - Supports individual short URLs OR channel shorts tabs.
   - Quality mapping adapted for standard mobile resolutions.
-  - Range selection for bulk downloading channel shorts safely using bash arrays.
+  - Range selection for bulk downloading channel shorts safely.
+  - Shared duplicate prevention via global `archive.txt`.
 
 ### 4. `youtube_bulk_download.bat` / `youtube_bulk_download.sh`
 - **Purpose**: Automates mass downloads of playlists or entire channel uploads.
@@ -88,6 +101,7 @@ To use these scripts, you must have the following tools installed and added to y
   - Safely handles multi-video downloads sequentially.
   - Creates organized folders based on playlist titles.
   - Supports index ranges (e.g., downloading items 1 through 10).
+  - Keeps duplicate tracking across sessions by storing a central `archive.txt` under the script directory.
 
 ---
 

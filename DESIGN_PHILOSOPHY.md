@@ -7,8 +7,10 @@ CLI tools like `yt-dlp` offer unmatched power but suffer from high cognitive loa
 Native shell scripts (Batch for Windows, Bash for Mac/Linux) provide a **zero-install runtime environment** across all major operating systems. They act as an interface layer, bridging the gap between a raw CLI tool and the user without requiring a heavy GUI application framework.
 
 ## 3. Design Principles
-- **Simplicity First**: Clean interactive prompts requiring minimal keyboard input (mostly numbers 1-6).
-- **Resilience**: Configured with default retry limits (`--retries 5`) to handle spotty internet connections.
+- **Simplicity First**: Clean interactive prompts requiring minimal keyboard input (mostly numbers 1-8).
+- **Resilience**: Configured with default retry limits (`--retries 5`), timeout protections, and fallback update commands to ensure it runs under spotty network connections or permission-restricted environments.
+- **Fail-Fast Safety**: Validates internet connection, URL formatting, and runtime dependencies before initiating downloads, providing descriptive error messages to prevent silent failures.
+- **Archive Continuity**: Ensures previous downloads are remembered across folder targets by tracking downloads globally.
 - **Transparency**: Clearly echoes back user choices before initiating the download payload.
 
 ## 4. Target Audience & Use Cases
