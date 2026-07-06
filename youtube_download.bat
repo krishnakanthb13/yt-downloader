@@ -130,6 +130,8 @@ if exist "%USERPROFILE%\youtube_cookies.txt" (
     set COOKIEFLAGS=--cookies "cookies.txt"
 )
 
+set "FILTER=^!is_live"
+
 :: Build format string
 if "%FHEIGHT%"=="best" (
     set "FMTSTR=bestvideo+bestaudio/best"
@@ -140,26 +142,26 @@ if "%FHEIGHT%"=="best" (
 :: Run yt-dlp based on options
 if "%AUDIOONLY%"=="yes" (
     if defined COOKIEFLAGS (
-        yt-dlp --remote-components ejs:github !COOKIEFLAGS! -x --audio-format mp3 --audio-quality 0 --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+        yt-dlp --remote-components ejs:github !COOKIEFLAGS! -x --audio-format mp3 --audio-quality 0 --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
     ) else (
-        yt-dlp --remote-components ejs:github -x --audio-format mp3 --audio-quality 0 --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+        yt-dlp --remote-components ejs:github -x --audio-format mp3 --audio-quality 0 --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
     )
 ) else (
     if defined COOKIEFLAGS (
         if "%SUBLANG%"=="none" (
-            yt-dlp --remote-components ejs:github !COOKIEFLAGS! -f "%FMTSTR%" --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github !COOKIEFLAGS! -f "%FMTSTR%" --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
         ) else if "%SUBLANG%"=="all" (
-            yt-dlp --remote-components ejs:github !COOKIEFLAGS! -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github !COOKIEFLAGS! -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
         ) else (
-            yt-dlp --remote-components ejs:github !COOKIEFLAGS! -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github !COOKIEFLAGS! -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
         )
     ) else (
         if "%SUBLANG%"=="none" (
-            yt-dlp --remote-components ejs:github -f "%FMTSTR%" --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github -f "%FMTSTR%" --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
         ) else if "%SUBLANG%"=="all" (
-            yt-dlp --remote-components ejs:github -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
         ) else (
-            yt-dlp --remote-components ejs:github -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
         )
     )
 )

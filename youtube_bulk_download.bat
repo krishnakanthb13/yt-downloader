@@ -154,56 +154,58 @@ if "%FHEIGHT%"=="best" (
     set "FMTSTR=bestvideo[height<=%FHEIGHT%]+bestaudio/best[height<=%FHEIGHT%]"
 )
 
+set "FILTER=^!is_live"
+
 :: Run yt-dlp based on options
 if "%AUDIOONLY%"=="yes" (
     if defined COOKIEFLAGS (
         if defined RANGEFLAGS (
-            yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -x --audio-format mp3 --audio-quality 0 !RANGEFLAGS! --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -x --audio-format mp3 --audio-quality 0 !RANGEFLAGS! --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
         ) else (
-            yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -x --audio-format mp3 --audio-quality 0 --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -x --audio-format mp3 --audio-quality 0 --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
         )
     ) else (
         if defined RANGEFLAGS (
-            yt-dlp --remote-components ejs:github --yes-playlist -x --audio-format mp3 --audio-quality 0 !RANGEFLAGS! --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github --yes-playlist -x --audio-format mp3 --audio-quality 0 !RANGEFLAGS! --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
         ) else (
-            yt-dlp --remote-components ejs:github --yes-playlist -x --audio-format mp3 --audio-quality 0 --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github --yes-playlist -x --audio-format mp3 --audio-quality 0 --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
         )
     )
 ) else (
     if defined COOKIEFLAGS (
         if defined RANGEFLAGS (
             if "%SUBLANG%"=="none" (
-                yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -f "%FMTSTR%" !RANGEFLAGS! --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+                yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -f "%FMTSTR%" !RANGEFLAGS! --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
             ) else if "%SUBLANG%"=="all" (
-                yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all !RANGEFLAGS! --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+                yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all !RANGEFLAGS! --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
             ) else (
-                yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% !RANGEFLAGS! --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+                yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% !RANGEFLAGS! --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
             )
         ) else (
             if "%SUBLANG%"=="none" (
-                yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -f "%FMTSTR%" --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+                yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -f "%FMTSTR%" --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
             ) else if "%SUBLANG%"=="all" (
-                yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+                yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
             ) else (
-                yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+                yt-dlp --remote-components ejs:github !COOKIEFLAGS! --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
             )
         )
     ) else (
         if defined RANGEFLAGS (
             if "%SUBLANG%"=="none" (
-                yt-dlp --remote-components ejs:github --yes-playlist -f "%FMTSTR%" !RANGEFLAGS! --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+                yt-dlp --remote-components ejs:github --yes-playlist -f "%FMTSTR%" !RANGEFLAGS! --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
             ) else if "%SUBLANG%"=="all" (
-                yt-dlp --remote-components ejs:github --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all !RANGEFLAGS! --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+                yt-dlp --remote-components ejs:github --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all !RANGEFLAGS! --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
             ) else (
-                yt-dlp --remote-components ejs:github --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% !RANGEFLAGS! --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+                yt-dlp --remote-components ejs:github --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% !RANGEFLAGS! --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
             )
         ) else (
             if "%SUBLANG%"=="none" (
-                yt-dlp --remote-components ejs:github --yes-playlist -f "%FMTSTR%" --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+                yt-dlp --remote-components ejs:github --yes-playlist -f "%FMTSTR%" --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
             ) else if "%SUBLANG%"=="all" (
-                yt-dlp --remote-components ejs:github --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+                yt-dlp --remote-components ejs:github --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
             ) else (
-                yt-dlp --remote-components ejs:github --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!is_live" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
+                yt-dlp --remote-components ejs:github --yes-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" --download-archive "%~dp0archive.txt" -o "%SAVE_DIR%\%%(playlist)s\%%(playlist_index)s - %%(title).150s.%%(ext)s" "%URL%"
             )
         )
     )
