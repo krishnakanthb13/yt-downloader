@@ -1,0 +1,3 @@
+#!/bin/bash
+# Mock ffmpeg for testing
+exit 0

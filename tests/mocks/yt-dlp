@@ -1,0 +1,10 @@
+#!/bin/bash
+# Mock yt-dlp for testing
+# Records all arguments to a log file for verification
+
+MOCK_LOG="${MOCK_LOG:-/tmp/ytdlp_mock.log}"
+echo "yt-dlp $@" >> "$MOCK_LOG"
+
+# Simulate successful download by default
+# Set YTDLP_MOCK_EXIT to override exit code
+exit "${YTDLP_MOCK_EXIT:-0}"

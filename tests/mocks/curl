@@ -1,0 +1,4 @@
+#!/bin/bash
+# Mock curl for testing
+# Simulate successful connection to youtube.com
+exit 0
