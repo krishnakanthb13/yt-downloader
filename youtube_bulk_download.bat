@@ -133,7 +133,7 @@ if "%RANGE%"=="" (
 echo.
 echo ============================================
 echo  Starting bulk download...
-echo  URL     : %URL%
+echo  URL     : !URL!
 echo  Output  : %SAVE_DIR%
 echo  Quality : %FHEIGHT%
 echo ============================================

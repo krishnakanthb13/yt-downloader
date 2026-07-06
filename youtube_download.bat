@@ -116,7 +116,7 @@ if "%AUDIOONLY%"=="no" (
 echo.
 echo ============================================
 echo  Downloading...
-echo  URL     : %URL%
+echo  URL     : !URL!
 echo  Output  : %SAVE_DIR%
 echo  Quality : %FHEIGHT%
 echo ============================================

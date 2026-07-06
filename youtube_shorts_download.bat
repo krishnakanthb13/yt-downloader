@@ -120,7 +120,7 @@ if "%QCHOICE%"=="2" (
 echo.
 echo ============================================
 echo  Downloading...
-echo  URL    : %URL%
+echo  URL    : !URL!
 echo  Output : %SAVE_DIR%
 echo  Quality: %FHEIGHT%
 echo  Bulk   : %BULK%
