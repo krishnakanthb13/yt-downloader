@@ -195,6 +195,37 @@ Test-FileContent -FilePath $runBat -Pattern "goto menu" -Label "loops back to me
 Test-FileContent -FilePath $runBat -Pattern 'cd /d "%~dp0"' -Label "changes to script directory"
 Write-Host ""
 
+# ── Configuration & Input Validation ──────────────────
+Write-Host "--- Configuration & Input Validation ---" -ForegroundColor Yellow
+foreach ($file in @("youtube_download.bat", "youtube_bulk_download.bat", "youtube_shorts_download.bat")) {
+    $p = Join-Path $ProjectDir $file
+    Test-FileContent -FilePath $p -Pattern "downloader[.]conf" -Label "$file reads downloader.conf"
+    Test-FileContent -FilePath $p -Pattern "Invalid URL format" -Label "$file validates the URL format"
+    Test-FileContent -FilePath $p -Pattern "js-runtimes" -Label "$file enables a JS runtime when needed"
+    Test-FileContent -FilePath $p -Pattern "Failed to create save directory" -Label "$file checks the save directory"
+}
+foreach ($file in @("youtube_bulk_download.bat", "youtube_shorts_download.bat")) {
+    $p = Join-Path $ProjectDir $file
+    Test-FileContent -FilePath $p -Pattern "Invalid range format" -Label "$file validates the download range"
+}
+Test-FileContent -FilePath $dlBat -Pattern "no-playlist" -Label "single video uses --no-playlist"
+Test-FileContent -FilePath $shortsBat -Pattern "no-playlist" -Label "single short uses --no-playlist"
+Write-TestResult -Label "downloader.conf.example exists" -Passed (Test-Path (Join-Path $ProjectDir "downloader.conf.example"))
+Write-Host ""
+
+# ── Connectivity & FFmpeg Parity ──────────────────────
+Write-Host "--- Connectivity & FFmpeg Parity ---" -ForegroundColor Yellow
+foreach ($file in @("youtube_download.bat", "youtube_bulk_download.bat", "youtube_shorts_download.bat")) {
+    $p = Join-Path $ProjectDir $file
+    Test-FileContent -FilePath $p -Pattern "curl" -Label "$file checks internet connectivity"
+    Test-FileContent -FilePath $p -Pattern "Could not connect" -Label "$file warns when offline"
+}
+foreach ($file in @("youtube_download.bat", "youtube_bulk_download.bat")) {
+    $p = Join-Path $ProjectDir $file
+    Test-FileContent -FilePath $p -Pattern "required for audio extraction" -Label "$file blocks MP3 extraction without ffmpeg"
+}
+Write-Host ""
+
 # ── Summary ──────────────────────────────────────────
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "  Batch Script Tests Complete" -ForegroundColor Cyan

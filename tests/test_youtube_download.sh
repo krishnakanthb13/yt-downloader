@@ -143,4 +143,32 @@ echo "--- Window Title ---"
 assert_file_contains "displays title" "$SCRIPT" "YOUTUBE VIDEO DOWNLOADER"
 echo ""
 
+# ── Config-driven save directory (functional) ────────
+echo "--- Config-Driven Save Directory (functional) ---"
+
+setup_test_env
+cp "$SCRIPT" "$TEST_TMPDIR/youtube_download.sh"
+printf 'SAVE_DIR=%s/MyMovies\n' "$TEST_TMPDIR" > "$TEST_TMPDIR/downloader.conf"
+run_with_mock_ytdlp "$TEST_TMPDIR/youtube_download.sh" "https://youtu.be/abc123\n1\n1\n"
+
+TESTS_RUN=$((TESTS_RUN + 1))
+if grep -q "MyMovies" "$TEST_TMPDIR/ytdlp_mock.log" 2>/dev/null; then
+    echo -e "  ${GREEN}PASS${NC}: save directory is read from downloader.conf"
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+else
+    echo -e "  ${RED}FAIL${NC}: save directory was not read from downloader.conf"
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+fi
+
+TESTS_RUN=$((TESTS_RUN + 1))
+if grep -q -- "--no-playlist" "$TEST_TMPDIR/ytdlp_mock.log" 2>/dev/null; then
+    echo -e "  ${GREEN}PASS${NC}: single video is downloaded with --no-playlist"
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+else
+    echo -e "  ${RED}FAIL${NC}: single video is missing --no-playlist"
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+fi
+cleanup_test_env
+echo ""
+
 print_summary

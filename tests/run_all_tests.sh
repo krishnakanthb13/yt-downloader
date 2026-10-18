@@ -46,10 +46,13 @@ for test_file in "${TEST_FILES[@]}"; do
     output=$(bash "$test_path" 2>&1) || true
     echo "$output"
 
-    # Parse results from the output
-    file_passed=$(echo "$output" | grep -oP 'Passed: \K[0-9]+' || echo "0")
-    file_failed=$(echo "$output" | grep -oP 'Failed: \K[0-9]+' || echo "0")
-    file_run=$(echo "$output" | grep -oP 'Tests run: \K[0-9]+' || echo "0")
+    # Parse results from the output (portable: no GNU-only grep -oP)
+    file_passed=$(printf '%s\n' "$output" | sed -n 's/.*Passed: \([0-9][0-9]*\).*/\1/p' | tail -n 1)
+    file_failed=$(printf '%s\n' "$output" | sed -n 's/.*Failed: \([0-9][0-9]*\).*/\1/p' | tail -n 1)
+    file_run=$(printf '%s\n' "$output" | sed -n 's/.*Tests run: \([0-9][0-9]*\).*/\1/p' | tail -n 1)
+    file_passed=${file_passed:-0}
+    file_failed=${file_failed:-0}
+    file_run=${file_run:-0}
 
     TOTAL_RUN=$((TOTAL_RUN + file_run))
     TOTAL_PASSED=$((TOTAL_PASSED + file_passed))

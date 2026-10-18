@@ -74,6 +74,11 @@ for script in youtube_download.sh youtube_bulk_download.sh youtube_shorts_downlo
     assert_file_contains "$script checks for ffmpeg" "$PROJECT_DIR/$script" "command -v ffmpeg"
     assert_file_contains "$script warns when ffmpeg missing" "$PROJECT_DIR/$script" "ffmpeg not found"
 done
+
+# Audio-only modes must refuse to run when ffmpeg is missing.
+for script in youtube_download.sh youtube_bulk_download.sh; do
+    assert_file_contains "$script blocks MP3 extraction without ffmpeg" "$PROJECT_DIR/$script" "required for audio extraction"
+done
 echo ""
 
 # ── Empty URL rejection ──────────────────────────────
@@ -156,6 +161,24 @@ echo "--- ANSI Color Codes ---"
 for script in youtube_download.sh youtube_bulk_download.sh youtube_shorts_download.sh run_downloader.sh; do
     assert_file_contains "$script defines color variables" "$PROJECT_DIR/$script" "NC=.*No Color"
 done
+echo ""
+
+# ── Configuration file support ───────────────────────
+echo "--- Configuration File Support ---"
+
+for script in youtube_download.sh youtube_bulk_download.sh youtube_shorts_download.sh; do
+    assert_file_contains "$script reads downloader.conf" "$PROJECT_DIR/$script" 'downloader\.conf'
+    assert_file_contains "$script enables a JS runtime when needed" "$PROJECT_DIR/$script" 'js-runtimes'
+done
+
+TESTS_RUN=$((TESTS_RUN + 1))
+if [ -f "$PROJECT_DIR/downloader.conf.example" ]; then
+    echo -e "  ${GREEN}PASS${NC}: downloader.conf.example is provided"
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+else
+    echo -e "  ${RED}FAIL${NC}: downloader.conf.example is missing"
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+fi
 echo ""
 
 print_summary

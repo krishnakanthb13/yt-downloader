@@ -151,7 +151,7 @@ try {
     Write-Host ""
 
     # ================================================================
-    # FFmpeg warning (all download scripts)
+    # FFmpeg warning + MP3 enforcement (all download scripts)
     # ================================================================
     Write-Host "--- FFmpeg Warning ---"
 
@@ -164,6 +164,39 @@ try {
             $script:TestsPassed++
         } else {
             Write-Fail "$script missing ffmpeg warning"
+            $script:TestsFailed++
+        }
+    }
+
+    # Audio-only modes must refuse to run when ffmpeg is missing.
+    foreach ($script in @("youtube_download.bat", "youtube_bulk_download.bat")) {
+        $script:TestsRun++
+        $path = Join-Path $ProjectDir $script
+        $content = Get-Content $path -Raw
+        if ($content -match 'required for audio extraction') {
+            Write-Pass "$script blocks MP3 extraction without ffmpeg"
+            $script:TestsPassed++
+        } else {
+            Write-Fail "$script does not block MP3 extraction without ffmpeg"
+            $script:TestsFailed++
+        }
+    }
+    Write-Host ""
+
+    # ================================================================
+    # Internet connectivity check (all download scripts)
+    # ================================================================
+    Write-Host "--- Internet Connectivity Check ---"
+
+    foreach ($script in @("youtube_download.bat", "youtube_bulk_download.bat", "youtube_shorts_download.bat")) {
+        $script:TestsRun++
+        $path = Join-Path $ProjectDir $script
+        $content = Get-Content $path -Raw
+        if ($content -match 'curl' -and $content -match 'Could not connect') {
+            Write-Pass "$script checks internet connectivity with curl"
+            $script:TestsPassed++
+        } else {
+            Write-Fail "$script missing connectivity check"
             $script:TestsFailed++
         }
     }
@@ -506,7 +539,7 @@ try {
     # youtube_download.bat uses title.150s
     $script:TestsRun++
     $content = Get-Content (Join-Path $ProjectDir "youtube_download.bat") -Raw
-    if ($content -match 'title\.150s') {
+    if ($content -match '\(title\)\.150s') {
         Write-Pass "youtube_download.bat uses title.150s naming"
         $script:TestsPassed++
     } else {
@@ -528,7 +561,7 @@ try {
     # youtube_shorts_download.bat - single uses title.150s, bulk uses playlist_index
     $script:TestsRun++
     $content = Get-Content (Join-Path $ProjectDir "youtube_shorts_download.bat") -Raw
-    if ($content -match 'title\.150s' -and $content -match 'playlist_index') {
+    if ($content -match '\(title\)\.150s' -and $content -match 'playlist_index') {
         Write-Pass "youtube_shorts_download.bat has both single and bulk naming"
         $script:TestsPassed++
     } else {
@@ -557,22 +590,185 @@ try {
     Write-Host ""
 
     # ================================================================
-    # SAVE_DIR Defaults
+    # SAVE_DIR Configuration
     # ================================================================
-    Write-Host "--- SAVE_DIR Defaults ---"
+    Write-Host "--- SAVE_DIR Configuration ---"
 
     foreach ($script in @("youtube_download.bat", "youtube_bulk_download.bat", "youtube_shorts_download.bat")) {
         $script:TestsRun++
         $path = Join-Path $ProjectDir $script
         $content = Get-Content $path -Raw
-        if ($content -match 'set "SAVE_DIR=') {
-            Write-Pass "$script has hardcoded SAVE_DIR"
+        if ($content -match 'set "SAVE_DIR=' -and $content -match 'downloader\.conf') {
+            Write-Pass "$script reads SAVE_DIR from downloader.conf (with a fallback default)"
             $script:TestsPassed++
         } else {
-            Write-Fail "$script missing SAVE_DIR default"
+            Write-Fail "$script missing config-driven SAVE_DIR"
             $script:TestsFailed++
         }
     }
+    Write-Host ""
+
+    # ================================================================
+    # Functional: run youtube_download.bat with a mocked yt-dlp
+    # ================================================================
+    Write-Host "--- Functional: config-driven SAVE_DIR (executed) ---"
+
+    $binDir = Join-Path $TestTmpDir "bin"
+    New-Item -ItemType Directory -Path $binDir -Force | Out-Null
+    $logPath = Join-Path $TestTmpDir "ytdlp.log"
+    $runDir = Join-Path $TestTmpDir "run"
+    New-Item -ItemType Directory -Path $runDir -Force | Out-Null
+
+    # Mock yt-dlp: log its arguments, then fail (so Explorer is not opened).
+    $fakeYtdlp = "@echo off`r`nsetlocal DisableDelayedExpansion`r`n(echo %*)>>`"$logPath`"`r`nexit /b 1"
+    Set-Content -Path (Join-Path $binDir "yt-dlp.bat") -Value $fakeYtdlp -Encoding ASCII
+    Set-Content -Path (Join-Path $binDir "ffmpeg.bat") -Value "@echo off`r`nexit /b 0" -Encoding ASCII
+
+    # Compile tiny curl.exe stubs so the connectivity check stays hermetic
+    # (no real network access) and deterministic. A .bat mock cannot be used
+    # here because a batch file invoked without CALL does not return control.
+    $curlOkExe = Join-Path $TestTmpDir "curl_ok.exe"
+    $curlBadExe = Join-Path $TestTmpDir "curl_bad.exe"
+    $curlReady = $false
+    try {
+        Add-Type -TypeDefinition 'public class CurlOkStub { public static int Main(string[] a) { return 0; } }' -OutputAssembly $curlOkExe -OutputType ConsoleApplication -ErrorAction Stop
+        Add-Type -TypeDefinition 'public class CurlBadStub { public static int Main(string[] a) { return 1; } }' -OutputAssembly $curlBadExe -OutputType ConsoleApplication -ErrorAction Stop
+        $curlReady = $true
+    } catch {
+        Write-Skip "curl stub exe could not be built: $($_.Exception.Message)"
+    }
+    function Set-CurlMode {
+        param([bool]$Online)
+        if (-not $curlReady) { return }
+        $src = if ($Online) { $curlOkExe } else { $curlBadExe }
+        Copy-Item $src (Join-Path $binDir "curl.exe") -Force
+    }
+    Set-CurlMode -Online $true
+
+    # Restricted PATH used by the new functional tests: keeps ffmpeg/yt-dlp
+    # resolution deterministic (System32 holds `where` + a shadowed curl, but
+    # never ffmpeg), so removing a mock really means "not installed".
+    $testPath = "$binDir;$env:SystemRoot\System32;$env:SystemRoot"
+
+    Copy-Item (Join-Path $ProjectDir "youtube_download.bat") $runDir -Force
+    Set-Content -Path (Join-Path $runDir "downloader.conf") -Value "SAVE_DIR=$TestTmpDir\Movies" -Encoding ASCII
+    $inputFile = Join-Path $TestTmpDir "input.txt"
+    Set-Content -Path $inputFile -Value "https://youtu.be/abc123`r`n1`r`n1`r`n`r`n" -NoNewline -Encoding ASCII
+
+    $savedPath = $env:Path
+    $env:Path = "$binDir;$savedPath"
+    try {
+        $out = cmd /c "`"$(Join-Path $runDir 'youtube_download.bat')`" < `"$inputFile`"" 2>&1
+    } finally {
+        $env:Path = $savedPath
+    }
+
+    $script:TestsRun++
+    if ((Test-Path $logPath) -and ((Get-Content $logPath -Raw) -match [regex]::Escape("$TestTmpDir\Movies"))) {
+        Write-Pass "SAVE_DIR from downloader.conf reaches yt-dlp"
+        $script:TestsPassed++
+    } else {
+        Write-Fail "SAVE_DIR from downloader.conf did not reach yt-dlp"
+        $script:TestsFailed++
+    }
+
+    $script:TestsRun++
+    if ((Test-Path $logPath) -and ((Get-Content $logPath -Raw) -match [regex]::Escape("--no-playlist"))) {
+        Write-Pass "single video runs with --no-playlist"
+        $script:TestsPassed++
+    } else {
+        Write-Fail "single video did not run with --no-playlist"
+        $script:TestsFailed++
+    }
+
+    # Invalid URL must be rejected before yt-dlp is called.
+    Remove-Item $logPath -ErrorAction SilentlyContinue
+    Set-Content -Path $inputFile -Value "not-a-url`r`n`r`n" -NoNewline -Encoding ASCII
+    $env:Path = "$binDir;$savedPath"
+    try {
+        $badOut = cmd /c "`"$(Join-Path $runDir 'youtube_download.bat')`" < `"$inputFile`"" 2>&1
+    } finally {
+        $env:Path = $savedPath
+    }
+    $script:TestsRun++
+    if (($badOut -match "Invalid URL format") -and (-not (Test-Path $logPath))) {
+        Write-Pass "invalid URL is rejected before download"
+        $script:TestsPassed++
+    } else {
+        Write-Fail "invalid URL was not rejected"
+        $script:TestsFailed++
+    }
+
+    # Online run must NOT emit the offline warning.
+    $script:TestsRun++
+    if (-not $curlReady) {
+        Write-Skip "online run does not warn about connectivity (no curl stub)"
+    } elseif ($out -notmatch "Could not connect") {
+        Write-Pass "online run does not warn about connectivity"
+        $script:TestsPassed++
+    } else {
+        Write-Fail "online run incorrectly warned about connectivity"
+        $script:TestsFailed++
+    }
+
+    # Offline: warn, but still proceed to yt-dlp.
+    Set-CurlMode -Online $false
+    Remove-Item $logPath -ErrorAction SilentlyContinue
+    Set-Content -Path $inputFile -Value "https://youtu.be/abc123`r`n1`r`n1`r`n`r`n" -NoNewline -Encoding ASCII
+    $env:Path = $testPath
+    try {
+        $offlineOut = cmd /c "`"$(Join-Path $runDir 'youtube_download.bat')`" < `"$inputFile`"" 2>&1
+    } finally {
+        $env:Path = $savedPath
+    }
+    $script:TestsRun++
+    if (-not $curlReady) {
+        Write-Skip "offline run warns about connectivity (no curl stub)"
+    } elseif ($offlineOut -match "Could not connect") {
+        Write-Pass "offline run warns about connectivity"
+        $script:TestsPassed++
+    } else {
+        Write-Fail "offline run did not warn about connectivity"
+        $script:TestsFailed++
+    }
+    $script:TestsRun++
+    if (Test-Path $logPath) {
+        Write-Pass "offline warning does not abort the download"
+        $script:TestsPassed++
+    } else {
+        Write-Fail "offline warning aborted the download"
+        $script:TestsFailed++
+    }
+
+    # Audio-only (mp3) without ffmpeg: error out and never call yt-dlp.
+    Set-CurlMode -Online $true
+    Remove-Item (Join-Path $binDir "ffmpeg.bat") -ErrorAction SilentlyContinue
+    Remove-Item $logPath -ErrorAction SilentlyContinue
+    Set-Content -Path $inputFile -Value "https://youtu.be/abc123`r`n8`r`n`r`n" -NoNewline -Encoding ASCII
+    $env:Path = $testPath
+    try {
+        $audioOut = cmd /c "`"$(Join-Path $runDir 'youtube_download.bat')`" < `"$inputFile`"" 2>&1
+    } finally {
+        $env:Path = $savedPath
+    }
+    $script:TestsRun++
+    if ($audioOut -match "required for audio extraction") {
+        Write-Pass "MP3 mode without ffmpeg shows an error"
+        $script:TestsPassed++
+    } else {
+        Write-Fail "MP3 mode without ffmpeg did not show an error"
+        $script:TestsFailed++
+    }
+    $script:TestsRun++
+    if (-not (Test-Path $logPath)) {
+        Write-Pass "MP3 mode without ffmpeg does not call yt-dlp"
+        $script:TestsPassed++
+    } else {
+        Write-Fail "MP3 mode without ffmpeg still called yt-dlp"
+        $script:TestsFailed++
+    }
+    # Restore the ffmpeg mock.
+    Set-Content -Path (Join-Path $binDir "ffmpeg.bat") -Value "@echo off`r`nexit /b 0" -Encoding ASCII
     Write-Host ""
 
 } finally {

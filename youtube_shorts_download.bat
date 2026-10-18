@@ -24,11 +24,15 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-:: Check FFmpeg
-where ffmpeg >nul 2>&1
-if %errorlevel% neq 0 (
-    echo WARNING: ffmpeg not found. Some videos may not merge correctly.
+:: Detect internet connection (warning only; mirrors the Unix scripts)
+set "NETFAIL="
+where curl >nul 2>&1
+if errorlevel 1 set "NETFAIL=1"
+if not defined NETFAIL (
+    curl --connect-timeout 5 -A "Mozilla/5.0" -Is https://www.youtube.com >nul 2>&1
+    if errorlevel 1 set "NETFAIL=1"
 )
+if defined NETFAIL echo WARNING: Could not connect to youtube.com. You may be offline.
 
 :: ============================================
 :: The default save folder is read from downloader.conf
@@ -156,6 +160,10 @@ if "%QCHOICE%"=="2" (
 ) else (
     set "FHEIGHT=best"
 )
+
+:: Check FFmpeg (warning only; Shorts have no audio-only mode)
+where ffmpeg >nul 2>&1
+if errorlevel 1 echo WARNING: ffmpeg not found. Some video formats may not merge correctly.
 
 echo.
 echo ============================================
