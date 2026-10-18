@@ -9,7 +9,7 @@ Native shell scripts (Batch for Windows, Bash for Mac/Linux) provide a **zero-in
 ## 3. Design Principles
 - **Simplicity First**: Clean interactive prompts requiring minimal keyboard input (mostly numbers 1-8).
 - **Resilience**: Configured with default retry limits (`--retries 5`), timeout protections, and fallback update commands to ensure it runs under spotty network connections or permission-restricted environments.
-- **Fail-Fast Safety**: Validates internet connection, URL formatting, and runtime dependencies before initiating downloads, providing descriptive error messages to prevent silent failures.
+- **Fail-Fast Safety**: Validates the internet connection, URL formatting, and runtime dependencies before initiating downloads, providing descriptive error messages to prevent silent failures.
 - **Archive Continuity**: Ensures previous downloads are remembered across folder targets by tracking downloads globally.
 - **Transparency**: Clearly echoes back user choices before initiating the download payload.
 
@@ -20,4 +20,4 @@ Native shell scripts (Batch for Windows, Bash for Mac/Linux) provide a **zero-in
 
 ## 5. Trade-offs & Constraints
 - **Maintenance**: Heavily reliant on `yt-dlp` updates when YouTube changes its internal APIs.
-- **Dependencies**: Requires third-party tools (`yt-dlp`, `ffmpeg`, Python/Node) to be accessible in the system path prior to execution.
+- **Dependencies**: Requires third-party tools (`yt-dlp`, `ffmpeg`, and a JavaScript runtime such as Deno or Node.js) to be accessible in the system path prior to execution.

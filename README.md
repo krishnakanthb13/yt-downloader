@@ -17,7 +17,7 @@ A collection of interactive command-line scripts to effortlessly download YouTub
 ## Table of Contents
 1. [Why and What is it Created For?](#why-and-what-is-it-created-for)
 2. [Prerequisites](#prerequisites)
-3. [How to Use It](#how-to-use-it) (including [Running Tests](#running-tests))
+3. [How to Use It](#how-to-use-it) (includes Running Tests)
 4. [Code Functionality Documentation](#code-functionality-documentation)
 5. [How the Files are Connected](#how-the-files-are-connected)
 
@@ -33,22 +33,25 @@ This project was created to remove the friction of using command-line tools for 
 
 ## Prerequisites
 
-To use these scripts, you must have the following tools installed and added to your Windows **System PATH**:
+To use these scripts, you must have the following tools installed and available on your system **PATH** (Windows, macOS, or Linux):
 1. **yt-dlp**: The core downloading engine. [Download yt-dlp](https://github.com/yt-dlp/yt-dlp)
 2. **ffmpeg**: Required for merging high-quality video and audio streams. [Download FFmpeg](https://ffmpeg.org/)
 3. **JavaScript Runtime**: Required by `yt-dlp` for modern YouTube extraction.
    - **Recommended**: [Deno](https://deno.com/) (or run `winget install --id=DenoLand.Deno` in terminal).
-   - Alternative: [Node.js](https://nodejs.org/).
+   - Alternative: [Node.js](https://nodejs.org/). The scripts automatically pass `--js-runtimes node` when Deno is not installed, so Node.js alone works too.
 
 ---
 
 ## How to Use It
 
 1. **Clone/Download** this repository to your local machine.
-2. **(Optional) Set Default Save Path**:
-   - Open any `.bat` file in a text editor.
-   - Locate the line: `set "SAVE_DIR=D:\5 System 6\Videos"`
-   - Change it to your desired download directory (e.g., `set "SAVE_DIR=C:\Users\YourName\Downloads"`).
+2. **(Optional) Set a Default Save Path**:
+   - Copy `downloader.conf.example` to `downloader.conf` (in the same folder as the scripts).
+   - Set `SAVE_DIR` to your preferred folder, for example:
+     - Windows: `SAVE_DIR=C:\Users\YourName\Videos`
+     - Mac/Linux: `SAVE_DIR=/home/yourname/Videos`
+   - `downloader.conf` is git-ignored, so your personal path is never published.
+   - If you skip this step, or leave `SAVE_DIR` empty, the script simply asks for a folder on each run.
 3. **Execute**: 
    - **Recommended**: Double-click `run_downloader.bat` to open the Master Menu and choose an option.
    - Alternatively, double-click the specific script directly:
@@ -61,9 +64,10 @@ To use these scripts, you must have the following tools installed and added to y
    - Or run specific scripts: `bash youtube_download.sh`, etc.
 5. **Follow Prompts**: Paste the URL and make your selections via the keyboard.
 6. **Running Tests**:
-   - **Windows**: Open PowerShell, navigate to the project directory, and run the test suite:
+   - **Windows**: Open PowerShell, navigate to the project directory, and run the test suites:
      ```powershell
      powershell -ExecutionPolicy Bypass -File tests/run_all_tests.ps1
+     powershell -ExecutionPolicy Bypass -File tests/test_batch_files.ps1
      ```
    - **Linux/Mac**: Run the shell test runner script:
      ```bash
@@ -84,8 +88,10 @@ To use these scripts, you must have the following tools installed and added to y
   - Quality presets: Best, 2160p (4K), 1440p (2K), 1080p, 720p, 480p, 360p, or Audio Only (MP3).
   - Subtitle downloading (supports English, Tamil, or all available).
   - Embedded metadata and thumbnails.
-  - Active network checking before download starts.
-  - Verification of `yt-dlp` and `ffmpeg` presence with user notifications.
+  - Connectivity check with `curl` before download starts.
+  - Rejects empty or malformed URLs before contacting `yt-dlp`.
+  - Downloads a single video (`--no-playlist`), even when the URL also references a playlist.
+  - Verification of `yt-dlp` and `ffmpeg` presence; MP3 extraction is blocked when `ffmpeg` is missing.
 
 ### 3. `youtube_shorts_download.bat` / `youtube_shorts_download.sh`
 - **Purpose**: Specifically handles YouTube Shorts.
@@ -100,8 +106,12 @@ To use these scripts, you must have the following tools installed and added to y
 - **Features**:
   - Safely handles multi-video downloads sequentially.
   - Creates organized folders based on playlist titles.
-  - Supports index ranges (e.g., downloading items 1 through 10).
+  - Supports index ranges (e.g., downloading items 1 through 10), validated to accept only digits, commas, and hyphens.
   - Keeps duplicate tracking across sessions by storing a central `archive.txt` under the script directory.
+
+### 5. `downloader.conf` (optional)
+- **Purpose**: Stores your default settings so the scripts do not have to ask every time.
+- **How it works**: Copy `downloader.conf.example` to `downloader.conf` and set `SAVE_DIR`. The real `downloader.conf` is git-ignored, so personal paths stay local. If it is missing, or `SAVE_DIR` is empty, the scripts fall back to asking (with a default of `Downloads` / `Shorts`).
 
 ---
 

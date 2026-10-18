@@ -1,5 +1,10 @@
 # Social Media Announcements
 
+> These are archived announcement drafts for past releases, kept for reference. They
+> describe the project as it was at each release; for the current feature set, see the
+> [README](README.md). (In particular, the "zero configuration" wording below predates
+> the optional `downloader.conf` file.)
+
 ## [v0.0.8] - 2026-04-30
 
 ### 💼 Platform 1: LinkedIn

@@ -20,4 +20,9 @@ Open an issue first to discuss the design before submitting code changes.
 
 ## 4. Pre-submission Checklist
 - Ensure scripts execute correctly in standard CMD/PowerShell.
-- Validate that no hardcoded absolute paths leak into commits.
+- Validate that no hardcoded absolute paths leak into commits (keep machine-specific
+  settings in the git-ignored `downloader.conf`, never in the scripts).
+- Run the test suites and make sure they pass:
+  - Windows: `powershell -ExecutionPolicy Bypass -File tests/run_all_tests.ps1` and
+    `powershell -ExecutionPolicy Bypass -File tests/test_batch_files.ps1`
+  - Mac/Linux: `bash tests/run_all_tests.sh`
