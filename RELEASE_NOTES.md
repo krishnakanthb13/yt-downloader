@@ -1,6 +1,10 @@
 # Release Notes
 
 ## [Unreleased]
+
+---
+
+## [v0.1.9] - 2026-10-18
 ### 🚀 New Features
 - **Config File (`downloader.conf`)**: The default save folder is now read from an optional, git-ignored `downloader.conf` (copy from `downloader.conf.example`). Personal paths are no longer hardcoded in the scripts, and users are prompted when it is not set.
 
@@ -13,13 +17,17 @@
 - **Portable Tests**: The shell test runner no longer relies on the GNU-only `grep -oP`.
 - **Safer Empty Arrays**: Bash flag arrays are expanded with the `"${ARR[@]+"${ARR[@]}"}"` guard so `set -u` never aborts on an empty array (also works on the Bash 3.2 shipped with macOS).
 - **Windows Parity**: The `.bat` scripts now run the same connectivity check and enforce `ffmpeg` for MP3 extraction that the Unix scripts already did, so both platforms behave identically.
+- **Parity Tests**: The batch suites now execute the connectivity warning and the MP3 refusal against a mocked `yt-dlp`. A tiny `curl.exe` stub is compiled for the run so the checks stay hermetic (no real network access), and a restricted `PATH` makes "ffmpeg missing" deterministic.
 
 ### 🐛 Bug Fixes
 - **Save-Folder Prompt**: A folder typed at the "Output folder" prompt is no longer overwritten with the default value.
 - **Save-Folder Check**: The scripts now confirm the save folder actually exists after `mkdir` and fail with a clear message otherwise.
+- **Output-Naming Test Regex**: The assertion `title\.150s` could never match the real `%(title).150s` template, so two tests had been failing since the suite was added. Corrected to `\(title\)\.150s`.
 
 ### 📚 Documentation
 - Documented `downloader.conf`, the new validation, and the Node.js fallback, and added static + functional regression tests.
+- Synced `README.md`, `CODE_DOCUMENTATION.md`, and `DESIGN_PHILOSOPHY.md` so the connectivity and MP3/`ffmpeg` behaviour is documented for both platforms; the old "Unix scripts only" caveats were removed.
+- Replaced two unrelated AI chat transcripts (`cg.md` and `ds.md`) with a proper change report; `ds.md` now documents this hardening pass.
 
 ---
 
