@@ -1,0 +1,30 @@
+# ============================================================
+# yt-downloader configuration
+# ============================================================
+#
+# Copy this file to "downloader.conf" (in the same folder as the
+# scripts) and edit it to set your own defaults. The real
+# "downloader.conf" is git-ignored, so your personal paths stay
+# local and are never committed to a public repository.
+#
+# Rules:
+#   - One setting per line, in the form  NAME=VALUE
+#   - Do NOT add spaces around the "=" sign
+#   - Lines starting with "#" are comments and are ignored
+#
+# ------------------------------------------------------------
+# SAVE_DIR : Default folder where downloads are stored.
+#
+#   Leave it empty (the default) to be asked every time.
+#   Both forward slashes and backslashes work on Windows.
+#
+#   Use a full, absolute path. The value is used exactly as written:
+#   "~" and "$HOME" are NOT expanded, so write the path out in full.
+#
+#   Examples:
+#     SAVE_DIR=D:\Videos
+#     SAVE_DIR=C:\Users\YourName\Downloads
+#     SAVE_DIR=/home/yourname/Videos
+# ------------------------------------------------------------
+
+SAVE_DIR=

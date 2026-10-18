@@ -2,6 +2,9 @@
 *.tmp
 *.bak
 
+# Local configuration (may contain personal paths)
+downloader.conf
+
 # Python cache
 __pycache__/
 *.pyc

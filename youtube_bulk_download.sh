@@ -23,11 +23,14 @@ if ! command -v curl >/dev/null 2>&1 || ! curl --connect-timeout 5 -A "Mozilla/5
 fi
 
 # ============================================
-# HARDCODE YOUR SAVE LOCATION HERE
-# Example: SAVE_DIR="$HOME/YouTube Downloads"
-# Leave blank to be asked every time
+# DEFAULT SAVE LOCATION
+# Set SAVE_DIR in downloader.conf (see downloader.conf.example).
+# Leave it blank to be asked every time you run this script.
 # ============================================
 SAVE_DIR=""
+if [ -f "downloader.conf" ]; then
+    SAVE_DIR="$(sed -n 's/^[[:space:]]*SAVE_DIR[[:space:]]*=[[:space:]]*//p' downloader.conf | tail -n 1 | sed -e 's/[[:space:]]*$//')"
+fi
 
 # ============================================
 
@@ -174,15 +177,23 @@ elif [ -f "cookies.txt" ]; then
     COOKIEFLAGS=("--cookies" "cookies.txt")
 fi
 
+# JavaScript runtime support
+# yt-dlp enables Deno by default; enable Node.js when Deno is not installed.
+JSFLAGS=()
+if ! command -v deno >/dev/null 2>&1 && command -v node >/dev/null 2>&1; then
+    JSFLAGS=("--js-runtimes" "node")
+fi
+
 # Download execution
 if [ "$AUDIOONLY" = "yes" ]; then
     set +e
     yt-dlp \
         --remote-components ejs:github \
-        "${COOKIEFLAGS[@]}" \
+        "${COOKIEFLAGS[@]+"${COOKIEFLAGS[@]}"}" \
+        "${JSFLAGS[@]+"${JSFLAGS[@]}"}" \
         --yes-playlist \
         -x --audio-format mp3 --audio-quality 0 \
-        "${RANGEFLAGS[@]}" \
+        "${RANGEFLAGS[@]+"${RANGEFLAGS[@]}"}" \
         --retries 5 \
         --fragment-retries 5 \
         -c --part \
@@ -213,11 +224,12 @@ else
     set +e
     yt-dlp \
         --remote-components ejs:github \
-        "${COOKIEFLAGS[@]}" \
+        "${COOKIEFLAGS[@]+"${COOKIEFLAGS[@]}"}" \
+        "${JSFLAGS[@]+"${JSFLAGS[@]}"}" \
         --yes-playlist \
         -f "$FMTSTR" \
-        "${SUBFLAGS[@]}" \
-        "${RANGEFLAGS[@]}" \
+        "${SUBFLAGS[@]+"${SUBFLAGS[@]}"}" \
+        "${RANGEFLAGS[@]+"${RANGEFLAGS[@]}"}" \
         --merge-output-format mp4 \
         --embed-metadata \
         --embed-thumbnail \
@@ -245,9 +257,9 @@ else
     echo -e "${CYAN} Files saved in: $SAVE_DIR${NC}"
     echo -e "${CYAN}============================================${NC}"
     if command -v open >/dev/null 2>&1; then
-        open "$SAVE_DIR"
+        open "$SAVE_DIR" || true
     elif command -v xdg-open >/dev/null 2>&1; then
-        xdg-open "$SAVE_DIR"
+        xdg-open "$SAVE_DIR" || true
     fi
 fi
 

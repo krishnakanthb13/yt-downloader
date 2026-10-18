@@ -1,8 +1,19 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal
 title YouTube Video Downloader
 color 0B
 cd /d "%~dp0"
+
+:: Load the default save location from downloader.conf (optional).
+:: Read before enabling delayed expansion so "!" in a path is preserved.
+set "SAVE_DIR="
+if exist "%~dp0downloader.conf" (
+    for /f "usebackq eol=# tokens=1,* delims==" %%A in ("%~dp0downloader.conf") do (
+        if /i "%%A"=="SAVE_DIR" set "SAVE_DIR=%%B"
+    )
+)
+
+setlocal enabledelayedexpansion
 
 :: Check that yt-dlp exists
 where yt-dlp >nul 2>&1
@@ -20,12 +31,9 @@ if %errorlevel% neq 0 (
 )
 
 :: ============================================
-:: HARDCODE YOUR SAVE LOCATION HERE
-:: Example: set "SAVE_DIR=D:\YouTube Downloads"
-:: Leave blank to be asked every time
-:: ============================================
-set "SAVE_DIR=D:\5 System 6\Videos"
-
+:: The default save folder is read from downloader.conf
+:: (see downloader.conf.example). If it is empty or missing,
+:: you will be asked for a folder below.
 :: ============================================
 
 echo ============================================
@@ -45,15 +53,29 @@ if "%URL%"=="" (
     exit /b 1
 )
 
+set "URL_OK=no"
+if /i "!URL:~0,7!"=="http://" set "URL_OK=yes"
+if /i "!URL:~0,8!"=="https://" set "URL_OK=yes"
+if "!URL_OK!"=="no" (
+    echo ERROR: Invalid URL format.
+    pause
+    exit /b 1
+)
+
 :: Save location
 if "%SAVE_DIR%"=="" (
     echo.
     set /p "SAVE_DIR=Output folder (leave blank for 'Downloads'): "
-    if "%SAVE_DIR%"=="" set "SAVE_DIR=Downloads"
+    if "!SAVE_DIR!"=="" set "SAVE_DIR=Downloads"
 )
 
 if not exist "%SAVE_DIR%" mkdir "%SAVE_DIR%"
-echo Save location: %SAVE_DIR%
+if not exist "%SAVE_DIR%" (
+    echo ERROR: Failed to create save directory "!SAVE_DIR!".
+    pause
+    exit /b 1
+)
+echo Save location: !SAVE_DIR!
 
 :: Quality
 echo.
@@ -117,7 +139,7 @@ echo.
 echo ============================================
 echo  Downloading...
 echo  URL     : !URL!
-echo  Output  : %SAVE_DIR%
+echo  Output  : !SAVE_DIR!
 echo  Quality : %FHEIGHT%
 echo ============================================
 echo.
@@ -128,6 +150,14 @@ if exist "%USERPROFILE%\youtube_cookies.txt" (
     set COOKIEFLAGS=--cookies "%USERPROFILE%\youtube_cookies.txt"
 ) else if exist "cookies.txt" (
     set COOKIEFLAGS=--cookies "cookies.txt"
+)
+
+:: JavaScript runtime support (Deno is yt-dlp's default; enable Node.js if no Deno)
+set "JSFLAGS="
+where deno >nul 2>&1
+if errorlevel 1 (
+    where node >nul 2>&1
+    if not errorlevel 1 set "JSFLAGS=--js-runtimes node"
 )
 
 set "FILTER=^!is_live"
@@ -142,26 +172,26 @@ if "%FHEIGHT%"=="best" (
 :: Run yt-dlp based on options
 if "%AUDIOONLY%"=="yes" (
     if defined COOKIEFLAGS (
-        yt-dlp --remote-components ejs:github !COOKIEFLAGS! -x --audio-format mp3 --audio-quality 0 --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+        yt-dlp --remote-components ejs:github !COOKIEFLAGS! !JSFLAGS! --no-playlist -x --audio-format mp3 --audio-quality 0 --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
     ) else (
-        yt-dlp --remote-components ejs:github -x --audio-format mp3 --audio-quality 0 --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+        yt-dlp --remote-components ejs:github !JSFLAGS! --no-playlist -x --audio-format mp3 --audio-quality 0 --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
     )
 ) else (
     if defined COOKIEFLAGS (
         if "%SUBLANG%"=="none" (
-            yt-dlp --remote-components ejs:github !COOKIEFLAGS! -f "%FMTSTR%" --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github !COOKIEFLAGS! !JSFLAGS! --no-playlist -f "%FMTSTR%" --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
         ) else if "%SUBLANG%"=="all" (
-            yt-dlp --remote-components ejs:github !COOKIEFLAGS! -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github !COOKIEFLAGS! !JSFLAGS! --no-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
         ) else (
-            yt-dlp --remote-components ejs:github !COOKIEFLAGS! -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github !COOKIEFLAGS! !JSFLAGS! --no-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
         )
     ) else (
         if "%SUBLANG%"=="none" (
-            yt-dlp --remote-components ejs:github -f "%FMTSTR%" --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github !JSFLAGS! --no-playlist -f "%FMTSTR%" --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
         ) else if "%SUBLANG%"=="all" (
-            yt-dlp --remote-components ejs:github -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github !JSFLAGS! --no-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs all --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
         ) else (
-            yt-dlp --remote-components ejs:github -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
+            yt-dlp --remote-components ejs:github !JSFLAGS! --no-playlist -f "%FMTSTR%" --write-subs --write-auto-subs --sub-langs %SUBLANG% --merge-output-format mp4 --embed-metadata --embed-thumbnail --retries 5 --fragment-retries 5 -c --part --no-overwrites --match-filter "!FILTER!" -o "%SAVE_DIR%\%%(title).150s.%%(ext)s" "%URL%"
         )
     )
 )
@@ -175,7 +205,7 @@ if errorlevel 1 (
 ) else (
     echo ============================================
     echo  Download COMPLETE!
-    echo  File saved in: %SAVE_DIR%
+    echo  File saved in: !SAVE_DIR!
     echo ============================================
     explorer "%SAVE_DIR%"
 )
